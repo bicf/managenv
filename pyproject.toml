@@ -1,6 +1,9 @@
 [project]
 name = "managenv"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.12"
+description = "managenv is a Python tool for merging `.env` snippet files into output files with automatic inheritance via dot notation."
+requires-python = ">=3.10"
 dependencies = []
+
+[project.scripts]
+managenv = "managenv:main"
