@@ -5,12 +5,15 @@ A tool to manage multiple `.env` files by combining reusable fragments into arti
 ## Installation
 
 ```bash
-pip install .
+# System-wide (user install, recommended)
+pip install --user .
 # or
-uv pip install .
+uv pip install --user .
 ```
 
-This makes the `managenv` command available. Alternatively, run directly with `python managenv.py`.
+This installs the `managenv` command to `~/.local/bin/`. Make sure `~/.local/bin` is on your `PATH`.
+
+Alternatively, install system-wide (requires root) or run directly with `python managenv.py`.
 
 ---
 
@@ -156,7 +159,18 @@ Creates a new `managenv-config.json` with default structure.
 
 ### Shell Completion
 
-**Save to file:**
+**Auto-install to rc file:**
+```bash
+# Install to ~/.bashrc
+managenv --scripts bash --apply
+
+# Install to ~/.zshrc
+managenv --scripts zsh --apply
+```
+
+Running `--apply` again is safe — it detects if completions are already installed.
+
+**Save to file (manual):**
 ```bash
 # Generate bash completion
 managenv --scripts bash > ~/.managenv-completion.bash
@@ -184,7 +198,12 @@ Provides intelligent completion for artifact names, fragment names, and flags.
 managenv -c /path/to/config.json
 ```
 
-Uses a custom config file instead of the default `managenv-config.json` (located next to the script).
+Uses a custom config file. The **base directory** (used to resolve relative paths) is always the directory containing the config file.
+
+**Default config location** (searched in order):
+1. Path specified with `-c/--config` flag
+2. `managenv.json` in script directory (if exists)
+3. `managenv.json` in current working directory
 
 ---
 
@@ -433,18 +452,26 @@ managenv --import prod.env --prefix database.prod
 
 ## Directory Structure
 
+All relative paths in the config are resolved from the **config file's directory** (the base directory).
+
 ```
 project/
-├── managenv-config.json   # Configuration
-├── managenv.py            # The tool
-├── fragments/             # Your .env fragments
+├── managenv.json          # Configuration (base directory = project/)
+├── fragments/             # Your .env fragments (relative to config)
 │   ├── backend.env
 │   ├── backend.prod.env
 │   └── frontend.env
-├── artifacts/             # Generated .env files (default)
+├── artifacts/             # Generated .env files (default location)
 │   ├── dev.env
 │   └── production.env
 └── history/               # Automatic backups before overwrite
+```
+
+**Example with custom config location:**
+```
+/home/user/configs/app.json   # Config file (base directory = /home/user/configs/)
+/home/user/configs/fragments/ # Fragments resolved from config directory
+/home/user/configs/artifacts/ # Artifacts resolved from config directory
 ```
 
 ---
