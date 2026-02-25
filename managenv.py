@@ -448,9 +448,26 @@ def check_uri_accessible(uri: str, base_dir: Path) -> str | None:
 
 def validate_config(config_path: Path, base_dir: Path) -> int:
     """Validate config for errors. Returns 0 if valid, 1 if errors."""
-    fragments, artifacts = load_config(config_path)
     errors = []
     warnings = []
+
+    # Check if config file exists
+    if not config_path.exists():
+        print("Errors:")
+        print(f"  Config file not found: {config_path}")
+        return 1
+
+    # Try to load and parse JSON
+    try:
+        fragments, artifacts = load_config(config_path)
+    except json.JSONDecodeError as e:
+        print("Errors:")
+        print(f"  Invalid JSON in config file: {e}")
+        return 1
+    except Exception as e:
+        print("Errors:")
+        print(f"  Failed to load config: {e}")
+        return 1
 
     # Check all fragment URIs are accessible
     for alias, uri in fragments.items():
