@@ -834,7 +834,7 @@ def _bash_completion_script() -> str:
     local cur prev words cword
     _init_completion || return
 
-    local flags="-c -a --config --artifact --dry-run --import --add --delete --uri --deploy --list --validate --diff --init --scripts"
+    local flags="-c -a --config --artifact --dry-run --import --add --delete --uri --deploy --list --validate --diff --init --scripts --apply"
 
     # Find config path from command line
     local config_path=""
@@ -887,7 +887,7 @@ except: pass
                 active_flag="${words[i]}"
                 arg_pos=0
                 ;;
-            --dry-run|--deploy|--list|--validate|--init)
+            --dry-run|--deploy|--list|--validate|--init|--apply)
                 active_flag=""
                 arg_pos=0
                 ;;
@@ -1006,6 +1006,7 @@ _managenv() {
         '*--diff[Show diff for specific artifact (repeatable)]:artifact:_managenv_artifacts'
         '--init[Create a basic config file]'
         '--scripts[Output shell completion script]:shell:(bash zsh)'
+        '--apply[Install completion to rc file]'
     )
 
     _arguments -s -S $flags '*:artifact:_managenv_artifacts_csv'
@@ -1122,6 +1123,8 @@ def main():
     parser.add_argument("--init", action="store_true", help="Create a basic config file")
     parser.add_argument("--scripts", choices=["bash", "zsh"], metavar="SHELL",
                         help="Output shell completion script (bash or zsh)")
+    parser.add_argument("--apply", action="store_true",
+                        help="Install completion script to ~/.bashrc or ~/.zshrc (use with --scripts)")
     args = parser.parse_args()
 
     # Resolve target artifacts from -a flags and positional args
@@ -1140,7 +1143,19 @@ def main():
 
     # Handle --scripts (shell completion)
     if args.scripts:
-        print(generate_completion_script(args.scripts))
+        script = generate_completion_script(args.scripts)
+        if args.apply:
+            rc_file = Path.home() / (".bashrc" if args.scripts == "bash" else ".zshrc")
+            marker = "# managenv completions"
+            rc_content = rc_file.read_text() if rc_file.exists() else ""
+            if marker in rc_content:
+                print(f"Completions already installed in {rc_file}")
+            else:
+                with open(rc_file, "a") as f:
+                    f.write(f"\n{marker}\n{script}\n")
+                print(f"Completions installed to {rc_file}")
+        else:
+            print(script)
         return 0
 
     # Handle --init
