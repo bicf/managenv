@@ -1120,7 +1120,15 @@ _managenv "$@"'''
 def main():
     parser = argparse.ArgumentParser(description="Merge .env fragments into artifact files")
     script_dir = Path(__file__).parent.resolve()
-    default_config = script_dir / "managenv.json"
+
+    # Determine default config path:
+    # 1. If managenv.json exists in script directory, use it
+    # 2. Otherwise, use current directory
+    if (script_dir / "managenv.json").exists():
+        default_config = script_dir / "managenv.json"
+    else:
+        default_config = Path.cwd() / "managenv.json"
+
     parser.add_argument("-c", "--config", default=str(default_config), help="Config file path")
     parser.add_argument("-a", "--artifact", action="append", dest="artifact",
                         help="Generate specific artifact (repeatable)")
@@ -1154,8 +1162,10 @@ def main():
     seen: set[str] = set()
     target_artifacts = [a for a in target_artifacts if not (a in seen or seen.add(a))]
 
-    config_path = Path(args.config)
-    base_dir = config_path.parent if config_path.parent != Path() else Path(".")
+    # Determine config path and base directory
+    # Base directory is always the directory containing the config file
+    config_path = Path(args.config).resolve()
+    base_dir = config_path.parent
     history_dir = base_dir / "history"
 
     # Handle --scripts (shell completion)
