@@ -60,13 +60,19 @@ managenv
 
 Generates all artifacts defined in the config.
 
-### Generate Specific Artifact
+### Generate Specific Artifacts
 
 ```bash
 managenv -a dev.env
 ```
 
 Generates only the specified artifact.
+
+**Multiple artifacts** (repeatable flag or comma-separated):
+```bash
+managenv -a dev.env -a prod.env
+managenv dev.env,prod.env
+```
 
 ### Dry Run (Preview)
 
@@ -95,15 +101,15 @@ Checks for missing files and undefined fragment references.
 ### Show Diff
 
 ```bash
-managenv --diff
+managenv --diff dev.env
 ```
 
 Shows what would change compared to existing artifact files.
 
-Can be combined with `-a` to diff a specific artifact:
-
+**Multiple artifacts**:
 ```bash
-managenv --diff -a dev.env
+managenv --diff dev.env --diff prod.env
+managenv --diff dev.env,prod.env
 ```
 
 ### Add Artifact
@@ -139,6 +145,38 @@ managenv --import existing.env --prefix backend
 ```
 
 Imports an existing `.env` file as a new fragment. Auto-creates config if needed.
+
+### Initialize Config
+
+```bash
+managenv --init
+```
+
+Creates a new `managenv-config.json` with default structure.
+
+### Shell Completion
+
+**Save to file:**
+```bash
+# Generate bash completion
+managenv --scripts bash > ~/.managenv-completion.bash
+echo 'source ~/.managenv-completion.bash' >> ~/.bashrc
+
+# Generate zsh completion
+managenv --scripts zsh > ~/.managenv-completion.zsh
+echo 'source ~/.managenv-completion.zsh' >> ~/.zshrc
+```
+
+**Load directly in current shell:**
+```bash
+# Bash
+source <(./managenv.py --scripts bash)
+
+# Zsh
+source <(./managenv.py --scripts zsh)
+```
+
+Provides intelligent completion for artifact names, fragment names, and flags.
 
 ### Custom Config File
 
