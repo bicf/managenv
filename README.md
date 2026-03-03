@@ -30,7 +30,7 @@ API_PORT=8000
 VITE_API_URL=http://localhost:8000
 ```
 
-**2. Configure `managenv-config.json`:**
+**2. Configure `managenv.json`:**
 
 ```json
 {
